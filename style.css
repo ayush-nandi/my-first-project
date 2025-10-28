@@ -1,0 +1,46 @@
+/* This is a CSS comment. */
+
+/* Apply styles to the entire page */
+body {
+    /* Use a clean, modern font */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Add some basic padding and set text color */
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Style the main heading */
+h1 {
+    color: #005a9c; /* A nice blue color */
+}
+
+/* Style the main content area */
+main {
+    max-width: 800px;
+    margin: 20px auto; /* Center the main content */
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px; /* Give it soft, rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Add a subtle shadow */
+}
+
+/* Style the button */
+button {
+    background-color: #007bff; /* A bright blue */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer; /* Show a hand pointer on hover */
+    transition: background-color 0.3s ease; /* Smooth color change on hover */
+}
+
+/* Add a hover effect to the button */
+button:hover {
+    background-color: #0056b3; /* A darker blue on hover */
+}
