@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Quiz</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the page transitions and error message */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        
+        /* A simple fade-in for page sections */
+        .page-section {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Style for the "incorrect password" like error popup */
+        #error-message {
+            animation: shake 0.4s ease-in-out;
+            transform-origin: center;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- 1. Welcome Page -->
+    <div id="welcome-page" class="page-section w-full max-w-md p-8 bg-white rounded-xl shadow-2xl text-center">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">Space Quiz Challenge</h1>
+        <p class="text-gray-600 mb-8">Enter your name to begin your journey through the cosmos!</p>
+        <div class="mb-4">
+            <label for="name-input" class="sr-only">Your Name</label>
+            <input type="text" id="name-input" placeholder="Your Name" class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+        </div>
+        <button id="start-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Start Quiz
+        </button>
+    </div>
+
+    <!-- 2. Quiz Page (Initially Hidden) -->
+    <div id="quiz-page" class="page-section hidden w-full max-w-3xl p-8 bg-white rounded-xl shadow-2xl">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Space Quiz</h2>
+        <p class="text-gray-600 mb-8">Good luck, <span id="user-name-display" class="font-semibold"></span>!</p>
+        
+        <form id="quiz-form">
+            <!-- Questions will be dynamically inserted here by JavaScript -->
+            <div id="questions-container" class="space-y-8"></div>
+            
+            <!-- Submit Button and Error Message -->
+            <div class="mt-10 text-center">
+                <button type="submit" id="submit-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    Submit Answers
+                </button>
+                
+                <!-- Error "Popup" -->
+                <div id="error-message" class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-700 font-semibold rounded-lg shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    You must answer all questions!
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 3. Results Page (Initially Hidden) -->
+    <div id="results-page" class="page-section hidden w-full max-w-3xl p-8 bg-white rounded-xl shadow-2xl">
+        <h2 class="text-4xl font-bold text-gray-800 mb-4 text-center">Quiz Complete!</h2>
+        
+        <!-- Score Display -->
+        <div id="score-display" class="text-center text-3xl font-bold text-blue-600 bg-blue-50 p-6 rounded-lg mb-8 shadow-inner">
+            <!-- Score will be inserted here -->
+        </div>
+
+        <h3 class="text-2xl font-semibold text-gray-700 mb-6">Review Your Answers:</h3>
+        
+        <!-- Solutions will be dynamically inserted here -->
+        <div id="solutions-container" class="space-y-6"></div>
+
+        <!-- Thank You Message -->
+        <p class="text-2xl font-semibold text-gray-700 mt-12 text-center">
+            Thank you for participating!
+        </p>
+    </div>
+
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. QUIZ DATA ---
+        const quizData = [
+            {
+                question: "What is the largest planet in our solar system?",
+                options: ["Earth", "Mars", "Jupiter", "Saturn"],
+                answer: "Jupiter"
+            },
+            {
+                question: "Which planet is known as the 'Red Planet'?",
+                options: ["Venus", "Mars", "Mercury", "Uranus"],
+                answer: "Mars"
+            },
+            {
+                question: "What is the name of the galaxy our solar system is in?",
+                options: ["Andromeda", "Triangulum", "Milky Way", "Pinwheel"],
+                answer: "Milky Way"
+            },
+            {
+                question: "Which planet is closest to the Sun?",
+                options: ["Mercury", "Venus", "Earth", "Mars"],
+                answer: "Mercury"
+            },
+            {
+                question: "Who was the first human to walk on the Moon?",
+                options: ["Buzz Aldrin", "Yuri Gagarin", "Michael Collins", "Neil Armstrong"],
+                answer: "Neil Armstrong"
+            },
+            {
+                question: "What is the name of the force that keeps planets in orbit around the Sun?",
+                options: ["Gravity", "Electromagnetism", "Friction", "Dark Energy"],
+                answer: "Gravity"
+            },
+            {
+                question: "Which planet is famous for its extensive ring system?",
+                options: ["Jupiter", "Saturn", "Neptune", "Uranus"],
+                answer: "Saturn"
+            },
+            {
+                question: "What is the hottest planet in our solar system?",
+                options: ["Mercury", "Venus", "Mars", "Jupiter"],
+                answer: "Venus"
+            },
+            {
+                question: "What is the Great Red Spot on Jupiter?",
+                options: ["A large volcano", "A giant storm", "A deep crater", "A continent"],
+                answer: "A giant storm"
+            },
+            {
+                question: "How many planets are officially recognized in our solar system?",
+                options: ["7", "8", "9", "10"],
+                answer: "8"
+            }
+        ];
+
+        // --- 2. DOM ELEMENT REFERENCES ---
+        const welcomePage = document.getElementById('welcome-page');
+        const quizPage = document.getElementById('quiz-page');
+        const resultsPage = document.getElementById('results-page');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nameInput = document.getElementById('name-input');
+        const userNameDisplay = document.getElementById('user-name-display');
+        
+        const questionsContainer = document.getElementById('questions-container');
+        const quizForm = document.getElementById('quiz-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMessage = document.getElementById('error-message');
+        
+        const scoreDisplay = document.getElementById('score-display');
+        const solutionsContainer = document.getElementById('solutions-container');
+
+        let userName = "";
+        let userAnswers = {};
+
+        // --- 3. EVENT LISTENERS ---
+
+        // Start Button Click
+        startBtn.addEventListener('click', () => {
+            userName = nameInput.value.trim();
+            if (userName) {
+                userNameDisplay.textContent = userName;
+                welcomePage.classList.add('hidden');
+                quizPage.classList.remove('hidden');
+                loadQuestions();
+            } else {
+                // Optional: Add a small error for empty name
+                nameInput.classList.add('border-red-500', 'placeholder-red-400');
+                nameInput.placeholder = "Please enter your name first!";
+            }
+        });
+
+        // Quiz Form Submission
+        quizForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Stop the page from reloading
+
+            let allAnswered = true;
+            userAnswers = {};
+            let score = 0;
+
+            // Check if all questions are answered and grade them
+            quizData.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                
+                if (selectedOption) {
+                    const answer = selectedOption.value;
+                    userAnswers[index] = answer;
+                    if (answer === quizData[index].answer) {
+                        score++;
+                    }
+                } else {
+                    allAnswered = false;
+                }
+            });
+
+            // --- Validation Check ---
+            if (allAnswered) {
+                // All questions answered, hide error and show results
+                errorMessage.classList.add('hidden');
+                quizPage.classList.add('hidden');
+                resultsPage.classList.remove('hidden');
+                showResults(score);
+            } else {
+                // Not all questions answered, show error "popup"
+                errorMessage.classList.remove('hidden');
+                // Re-add animation class to trigger shake every time
+                errorMessage.classList.remove('shake-animation');
+                void errorMessage.offsetWidth; // Trigger reflow
+                errorMessage.classList.add('shake-animation');
+            }
+        });
+
+        // --- 4. FUNCTIONS ---
+
+        // Function to load questions into the quiz page
+        function loadQuestions() {
+            questionsContainer.innerHTML = ''; // Clear old questions
+            
+            quizData.forEach((q, index) => {
+                // Create the HTML for one question card
+                const questionCard = document.createElement('div');
+                questionCard.className = 'p-6 bg-gray-50 rounded-lg border border-gray-200 shadow-sm';
+                
+                // Question Text
+                let questionHTML = `<p class="text-lg font-semibold text-gray-800 mb-4">${index + 1}. ${q.question}</p>`;
+                
+                // Options
+                questionHTML += '<div class="space-y-3">';
+                q.options.forEach(option => {
+                    questionHTML += `
+                        <label class="flex items-center w-full p-3 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition cursor-pointer">
+                            <input type="radio" name="question${index}" value="${option}" class="text-blue-600 focus:ring-blue-500">
+                            <span class="ml-3 text-gray-700">${option}</span>
+                        </label>
+                    `;
+                });
+                questionHTML += '</div>';
+                
+                questionCard.innerHTML = questionHTML;
+                questionsContainer.appendChild(questionCard);
+            });
+        }
+
+        // Function to display the final score and solutions
+        function showResults(score) {
+            // Display the score
+            scoreDisplay.textContent = `Your Score: ${score} / ${quizData.length}`;
+            
+            solutionsContainer.innerHTML = ''; // Clear old solutions
+            
+            quizData.forEach((q, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === q.answer;
+                
+                const solutionCard = document.createElement('div');
+                solutionCard.className = `p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'}`;
+                
+                let solutionHTML = `<p class="text-base font-semibold text-gray-800 mb-2">${index + 1}. ${q.question}</p>`;
+                
+                if (isCorrect) {
+                    solutionHTML += `
+                        <p class="text-green-700">
+                            <span class="font-bold">Your answer:</span> ${userAnswer} (Correct!)
+                        </p>
+                    `;
+                } else {
+                    solutionHTML += `
+                        <p class="text-red-700">
+                            <span class="font-bold">Your answer:</span> ${userAnswer} (Incorrect)
+                        </This>
+                        <p class="text-green-700 mt-1">
+                            <span class="font-bold">Correct answer:</span> ${q.answer}
+                        </p>
+                    `;
+                }
+                
+                solutionCard.innerHTML = solutionHTML;
+                solutionsContainer.appendChild(solutionCard);
+            });
+        }
+
+    </script>
+</body>
+</html>
+
